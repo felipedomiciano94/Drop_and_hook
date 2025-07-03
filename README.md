@@ -47,6 +47,29 @@ Déficit: -6,3 (-39%)
 # ===============================
 st.set_page_config(page_title="Simulador Drop and Hook", layout="centered")
 
+# Inicializa variáveis de sessão (evita erros ao trocar de aba)
+def init_session_state():
+    default_values = {
+        'custo_frota': 1100.0,
+        'custo_spot': 606.41,  # atualizado conforme tabela
+        'custo_terceiro': 606.41,  # atualizado conforme tabela
+        'viagens_frota': 8,
+        'viagens_spot': 2,
+        'viagens_terceiro': 6,
+        'dias_uteis': 22
+    }
+    for key, val in default_values.items():
+        if key not in st.session_state:
+            st.session_state[key] = val
+
+init_session_state()
+
+# Sidebar - Custos unitários
+st.sidebar.header("💲 Custos por Modalidade")
+custo_frota = st.sidebar.number_input("Custo Frota Própria (R$)", min_value=0.0, value=st.session_state.custo_frota, step=50.0)
+custo_spot = st.sidebar.number_input("Custo SPOT (R$)", min_value=0.0, value=st.session_state.custo_spot, step=50.0)
+custo_terceiro = st.sidebar.number_input("Custo Terceiro (R$)", min_value=0.0, value=st.session_state.custo_terceiro, step=50.0)
+
 # --------- ABA 1 ---------
 aba = st.sidebar.radio("Escolha a aba:", ["Simulador de Custos", "Histórico de Atendimentos"])
 
@@ -56,19 +79,21 @@ if aba == "Simulador de Custos":
     with st.expander("📌 Premissas do Projeto"):
         st.code(premissas_txt)
 
-    st.header("📥 Insira os custos unitários por viagem")
+    st.header("🔧 Composição de Viagens por Modalidade (dia)")
 
-    col1, col2, col3 = st.columns(3)
-    custo_frota = col1.number_input("Custo Frota Própria (R$)", min_value=0.0, value=1100.0, step=50.0)
-    custo_spot = col2.number_input("Custo SPOT (R$)", min_value=0.0, value=1300.0, step=50.0)
-    custo_terceiro = col3.number_input("Custo Terceiro (R$)", min_value=0.0, value=1500.0, step=50.0)
+    viagens_frota = st.number_input("Qtd. Viagens com Frota Própria", min_value=0, value=st.session_state.viagens_frota, key="vf")
+    viagens_spot = st.number_input("Qtd. Viagens com SPOT", min_value=0, value=st.session_state.viagens_spot, key="vs")
+    viagens_terceiro = st.number_input("Qtd. Viagens com Terceiro", min_value=0, value=st.session_state.viagens_terceiro, key="vt")
+    dias_uteis = st.number_input("Qtd. Dias Úteis no Mês", min_value=1, max_value=31, value=st.session_state.dias_uteis, key="dias")
 
-    st.divider()
-
-    st.subheader("⚙️ Composição de Viagens por Modalidade (dia)")
-    viagens_frota = st.number_input("Qtd. Viagens com Frota Própria", min_value=0, value=8)
-    viagens_spot = st.number_input("Qtd. Viagens com SPOT", min_value=0, value=2)
-    viagens_terceiro = st.number_input("Qtd. Viagens com Terceiro", min_value=0, value=6)
+    # Atualiza os estados
+    st.session_state.viagens_frota = viagens_frota
+    st.session_state.viagens_spot = viagens_spot
+    st.session_state.viagens_terceiro = viagens_terceiro
+    st.session_state.dias_uteis = dias_uteis
+    st.session_state.custo_frota = custo_frota
+    st.session_state.custo_spot = custo_spot
+    st.session_state.custo_terceiro = custo_terceiro
 
     viagens_total = viagens_frota + viagens_spot + viagens_terceiro
 
@@ -76,22 +101,21 @@ if aba == "Simulador de Custos":
         st.warning("Insira pelo menos uma viagem para simular custos.")
         st.stop()
 
-    # ===============================
-    # CÁLCULOS
-    # ===============================
-    custo_total_dia = (
-        viagens_frota * custo_frota +
-        viagens_spot * custo_spot +
-        viagens_terceiro * custo_terceiro
-    )
-    custo_total_mes = custo_total_dia * 30  # fixo para efeito de simulação
+    custo_total_frota = viagens_frota * custo_frota
+    custo_total_spot = viagens_spot * custo_spot
+    custo_total_terceiro = viagens_terceiro * custo_terceiro
 
-    # ===============================
-    # RESULTADOS
-    # ===============================
+    custo_total_dia = custo_total_frota + custo_total_spot + custo_total_terceiro
+    custo_total_mes = custo_total_dia * dias_uteis
+
     st.subheader("💰 Resultado da Simulação")
     st.metric("Custo Diário Estimado", f"R$ {custo_total_dia:,.2f}")
-    st.metric("Custo Mensal Estimado (30 dias)", f"R$ {custo_total_mes:,.2f}")
+    st.metric(f"Custo Mensal Estimado ({dias_uteis} dias)", f"R$ {custo_total_mes:,.2f}")
+
+    with st.expander("✅ Totalizadores por Modalidade"):
+        st.write(f"Custo Frota Própria (R$/dia): R$ {custo_total_frota:,.2f}")
+        st.write(f"Custo SPOT (R$/dia): R$ {custo_total_spot:,.2f}")
+        st.write(f"Custo Terceiro (R$/dia): R$ {custo_total_terceiro:,.2f}")
 
     st.divider()
     st.caption("Simulação baseada em parâmetros fornecidos manualmente. Para uso estratégico e tomada de decisão.")
@@ -108,5 +132,11 @@ elif aba == "Histórico de Atendimentos":
         "Total": [234, 253, 385, 394, 489]
     }
     df_historico = pd.DataFrame(dados)
+
+    st.subheader("🗓️ Custos Totais por Modalidade (base histórica)")
+    st.write(f"Custo Total Frota: R$ {df_historico['Frota'].sum() * custo_frota:,.2f}")
+    st.write(f"Custo Total SPOT: R$ {df_historico['SPOT'].sum() * custo_spot:,.2f}")
+    st.write(f"Custo Total Terceiro: R$ {df_historico['Terceiro'].sum() * custo_terceiro:,.2f}")
+
     st.dataframe(df_historico, use_container_width=True)
     st.caption("Esses dados podem ser atualizados mensalmente conforme evolui o atendimento.")
