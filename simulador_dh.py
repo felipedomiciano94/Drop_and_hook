@@ -52,9 +52,9 @@ st.set_page_config(page_title="Simulador Drop and Hook", layout="wide")
 def init_session_state():
     default_values = {
         'custo_frota': 1100.0,
-        'custo_spot': 606.41,
+        'custo_spot': 2650.0,
         'custo_terceiro': 606.41,
-        'viagens_frota': 8,
+        'viagens_frota': 7,
         'viagens_spot': 2,
         'viagens_terceiro': 6,
         'dias_uteis': 22
@@ -117,11 +117,11 @@ if aba == "Simulador de Custos":
 elif aba == "Histórico de Atendimentos":
     st.title("📊 Histórico de Atendimento Atual")
     dados = {
-        "Mês": ["dez/24", "jan/25", "fev/25", "mar/25", "abr/25"],
-        "Frota": [40, 50, 90, 101, 128],
-        "SPOT": [0, 10, 44, 36, 25],
-        "Terceiro": [194, 193, 251, 257, 336],
-        "Total": [234, 253, 385, 394, 489]
+        "Mês": ["dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25"],
+        "Frota": [40, 50, 90, 101, 128, 107, 57],
+        "SPOT": [0, 10, 44, 36, 25, 54, 9],
+        "Terceiro": [194, 193, 251, 257, 336, 288, 211],
+        "Total": [234, 253, 385, 394, 489, 449, 277]
     }
     df_historico = pd.DataFrame(dados)
     st.write(f"Custo Total Frota: R$ {df_historico['Frota'].sum() * custo_frota:,.2f}")
@@ -133,10 +133,10 @@ elif aba == "Histórico de Atendimentos":
 elif aba == "Utilização de Recursos x Custos":
     st.title("📈 Utilização de Recursos x Custos")
     df_historico = pd.DataFrame({
-        "Mês": ["dez/24", "jan/25", "fev/25", "mar/25", "abr/25"],
-        "Frota": [40, 50, 90, 101, 128],
-        "SPOT": [0, 10, 44, 36, 25],
-        "Terceiro": [194, 193, 251, 257, 336],
+        "Mês": ["dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25",
+        "Frota": [40, 50, 90, 101, 128, 107, 57],
+        "SPOT": [0, 10, 44, 36, 25, 54, 9],
+        "[194, 193, 251, 257, 336, 288, 211],
     })
     df_historico["Custo Frota"] = df_historico["Frota"] * custo_frota
     df_historico["Custo SPOT"] = df_historico["SPOT"] * custo_spot
