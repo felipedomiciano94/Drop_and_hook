@@ -133,7 +133,7 @@ elif aba == "Histórico de Atendimentos":
 elif aba == "Utilização de Recursos x Custos":
     st.title("📈 Utilização de Recursos x Custos")
     df_historico = pd.DataFrame({
-        "Mês": ["dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25"]
+        "Mês": ["dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25"],
         "Frota": [40, 50, 90, 101, 128, 107, 57],
         "SPOT": [0, 10, 44, 36, 25, 54, 9],
         "Terceiro": [194, 193, 251, 257, 336, 288, 211],
