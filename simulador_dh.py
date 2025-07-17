@@ -136,7 +136,7 @@ elif aba == "Utilização de Recursos x Custos":
         "Mês": ["dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25",
         "Frota": [40, 50, 90, 101, 128, 107, 57],
         "SPOT": [0, 10, 44, 36, 25, 54, 9],
-        "[194, 193, 251, 257, 336, 288, 211],
+        "Terceiro": [194, 193, 251, 257, 336, 288, 211],
     })
     df_historico["Custo Frota"] = df_historico["Frota"] * custo_frota
     df_historico["Custo SPOT"] = df_historico["SPOT"] * custo_spot
